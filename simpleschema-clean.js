@@ -1,5 +1,34 @@
 Schema = {};
 
+Schema.extensions = new SimpleSchema({
+    defaultValue: {
+        type: String,
+        defaultValue: 'SomeDefaultValue',
+    },
+    autoValue: {
+        type: String,
+        autoValue: function() {
+            return 'SomeAutotValue';
+        },
+    },
+    createdAt: {
+        type: Date,
+        label: 'Erstellt am',
+        index: true,
+        autoValue: function() {
+            if (this.isInsert) {
+                return new Date;
+            } else if (this.isUpsert) {
+                return {
+                    $setOnInsert: new Date()
+                };
+            } else {
+                this.unset(); // => denyUpdate
+            }
+        }
+    }
+});
+
 Schema.profile = new SimpleSchema({
     name: {
         type: String,
@@ -7,37 +36,16 @@ Schema.profile = new SimpleSchema({
     },
 });
 
-Schema.profileExtensions = new SimpleSchema({
-    defaultValue: {
-        type: String,
-        optional: true,
-        defaultValue: 'SomeDefaultValue',
-    },
-    autoValue: {
-        type: String,
-        optional: true,
-        autoValue: function() {
-            return 'SomeAutotValue';
-        },
-    },
-    defaultDate: {
-        type: Date,
-        optional: true,
-        defaultValue: new Date(),
-    },
-    autoDate: {
-        type: Date,
-        optional: true,
-        autoValue: function() {
-            return new Date();
-        },
-    },
+Schema.persons = new SimpleSchema({
+    profile: {
+        type: Schema.profile,
+    }
 });
 
 Persons = new Mongo.Collection('persons');
 
-Persons.attachSchema(Schema.profile);
-Persons.attachSchema(Schema.profileExtensions);
+Persons.attachSchema(Schema.persons);
+Persons.attachSchema(Schema.extensions);
 
 if (Meteor.isClient) {
 
@@ -48,22 +56,26 @@ if (Meteor.isClient) {
 
                 this.event.preventDefault();
 
-                var result = '';
+                var toBeCleaned = {
+                    profile: doc
+                };
 
-                result += 'Before cleaning:\n\n';
-                result += EJSON.stringify(doc, {
+                var alertMessage = '';
+
+                alertMessage += 'Before cleaning:\n\n';
+                alertMessage += EJSON.stringify(toBeCleaned, {
                     indent: 4
                 });
 
                 // https://github.com/aldeed/meteor-autoform#onsubmit
-                Persons.simpleSchema().clean(doc);
+                Persons.simpleSchema().clean(toBeCleaned);
 
-                result += '\n\nAfter cleaning:\n\n';
-                result += EJSON.stringify(doc, {
+                alertMessage += '\n\nAfter cleaning:\n\n';
+                alertMessage += EJSON.stringify(toBeCleaned, {
                     indent: 4
                 });
 
-                alert(result);
+                alert(alertMessage);
 
                 this.done();
             },
