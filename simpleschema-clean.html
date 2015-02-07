@@ -1,0 +1,19 @@
+<body>
+
+    <div style="padding:1em">
+        <h1>Simpleschema.clean()</h1> {{> cleantest}}
+    </div>
+
+</body>
+
+
+<template name="cleantest">
+
+    {{#autoForm schema="Schema.profile" id="ProfileAutoForm" }}
+    <fieldset>
+        {{> afQuickField name='name'}}
+    </fieldset>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    {{/autoForm}}
+
+</template>
