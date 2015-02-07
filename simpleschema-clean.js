@@ -20,6 +20,18 @@ Schema.profileExtensions = new SimpleSchema({
             return 'SomeAutotValue';
         },
     },
+    defaultDate: {
+        type: Date,
+        optional: true,
+        defaultValue: new Date(),
+    },
+    autoDate: {
+        type: Date,
+        optional: true,
+        autoValue: function() {
+            return new Date();
+        },
+    },
 });
 
 Persons = new Mongo.Collection('persons');
@@ -42,10 +54,10 @@ if (Meteor.isClient) {
                 result += EJSON.stringify(doc, {
                     indent: 4
                 });
-                
+
                 // https://github.com/aldeed/meteor-autoform#onsubmit
                 Persons.simpleSchema().clean(doc);
-                
+
                 result += '\n\nAfter cleaning:\n\n';
                 result += EJSON.stringify(doc, {
                     indent: 4
