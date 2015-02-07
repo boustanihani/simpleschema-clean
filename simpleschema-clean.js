@@ -3,7 +3,7 @@ Schema = {};
 Schema.profile = new SimpleSchema({
     name: {
         type: String,
-        label: 'name',
+        label: 'Name',
     },
 });
 
